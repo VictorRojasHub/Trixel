@@ -1,0 +1,144 @@
+/* PhraseSequenceCreator.css */
+
+/* Reutilizando variáveis do nosso tema */
+:root {
+  --color-accent-green: #4CAF50;
+  --color-accent-red: #e63946;
+  --color-text-dark: #1d3557;
+  --color-glass-bg: rgba(255, 255, 255, 0.25); 
+}
+
+/* 1. Contêiner Principal (Glassmorphism) */
+.editor-card-glass {
+  max-width: 600px; /* Um pouco maior que o game box */
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 20px; /* Bordas mais arredondadas como no mockup */
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 40px rgba(31, 38, 135, 0.3);
+  color: var(--color-text-dark);
+}
+
+.editor-title {
+    font-size: 1.8rem;
+    color: var(--color-text-dark);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.editor-subtitle {
+    text-align: center;
+    margin-bottom: 25px;
+    opacity: 0.8;
+}
+
+/* 2. Estilo de Cada Linha de Input */
+.phrase-input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    position: relative;
+    padding-right: 40px; 
+}
+
+.phrase-input-group label {
+    font-weight: 600;
+    white-space: nowrap;
+    margin-right: 10px;
+    flex-shrink: 0; /* Impede que o label encolha */
+}
+
+/* Reutilizando o estilo do glass-input para a frase */
+.glass-input {
+    width: 100%;
+    /* MUDANÇA CRUCIAL: Remover min-height e usar padding vertical adequado */
+    min-height: unset; /* Garante que não herda altura mínima grande */
+    padding: 10px; /* Padding vertical adequado para uma linha */
+    height: auto;
+    
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    box-sizing: border-box; 
+    font-size: 1rem;
+    background-color: rgba(255, 255, 255, 0.6);
+    color: var(--color-text-dark);
+    transition: border-color 0.3s;
+}
+
+.glass-input:focus {
+    outline: none;
+    border-color: var(--color-accent-green);
+}
+
+/* 3. Botão de Deletar (Lixeira) */
+.delete-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-accent-red);
+    position: absolute;
+    right: 0; /* Posiciona fora do input group para o hover */
+    padding: 5px;
+    border-radius: 50%;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.delete-button:hover {
+    background-color: rgba(230, 57, 70, 0.1);
+    transform: scale(1.1);
+}
+
+/* 4. Botão de Adicionar Frase */
+.add-phrase-area {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 10px;
+    padding-left: 10px;
+    gap: 15px;
+    font-weight: 600;
+    color: var(--color-text-dark);
+}
+
+.add-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-accent-green);
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.add-button:hover {
+    transform: scale(1.1);
+}
+
+.add-button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 5. Botão Embaralhar/Gerar Game (Canto Inferior Direito) */
+.embaralhar-area {
+    text-align: right;
+    margin-top: 30px;
+}
+
+.embaralhar-button {
+    /* Reutilizando o estilo glass-button base */
+    background-color: transparent;
+    border: none;
+    color: var(--color-accent-green); /* Cor de destaque para o texto */
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: opacity 0.2s;
+    text-shadow: 0 0 5px rgba(76, 175, 80, 0.5); /* Sombra suave para destacar */
+}
+
+.embaralhar-button:hover {
+    opacity: 0.8;
+}

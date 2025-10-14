@@ -1,0 +1,134 @@
+/* Reutilizando variáveis de cor do HomePage.css */
+:root {
+    --color-glass-bg: rgba(255, 255, 255, 0.3); /* Um pouco mais opaco que o card */
+    --color-text-dark: #1d3557;
+    --color-accent: #e63946;
+}
+
+/* 1. Estilo Básico da Barra (Glassmorphism) */
+.filter-bar {
+    /* Composição Glassmorphism Base */
+    border-radius: 10px;
+    background: var(--color-glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); 
+    border: 1px solid rgba(255, 255, 255, 0.4); /* Borda mais definida */
+    box-shadow: 0 4px 15px 0 rgba(31, 38, 135, 0.2); 
+
+    /* Layout Flexível */
+    display: flex;
+    flex-wrap: nowrap; /* MUDANÇA: Impede quebras de linha em telas maiores. Se quebrar, é porque a tela é MUITO pequena. */
+    justify-content: space-between; /* MUDANÇA: Distribui o espaço igualmente */
+    align-items: center;
+    padding: 15px 25px;
+    margin-bottom: 30px;  /* Espaço entre a barra e a lista de cards */
+    /* Adiciona um mínimo de largura para evitar que a barra fique pequena demais */
+    min-width: 900px;
+}
+
+/* 2. Estilos dos Grupos e Labels */
+.filter-group {
+    display: flex;
+    align-items: center;
+    /* Reduz o espaçamento entre os grupos para liberar espaço para o botão */
+    margin-right: 15px; /* Reduzindo de 20px para 15px */
+    margin-bottom: 0; 
+    
+    /* MUDANÇA: Permite que os grupos encolham */
+    flex-shrink: 1; 
+}
+
+/* 3. Estilo do Botão */
+.filter-button {
+    /* ... (restante do estilo do botão) ... */
+    margin-top: 0; 
+    /* REMOVER: Não precisamos do margin-left: auto se usarmos justify-content: space-between */
+    /* Se você deixou o justify-content: flex-start, mantenha o margin-left: auto; */
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: var(--color-text-dark);
+    margin-right: 8px;
+    white-space: nowrap; /* Evita que o label quebre */
+}
+
+/* 3. Estilo do Seletor (Dropdown) - Glassmorphism no Input */
+.glass-select {
+    /* Estilo de Vidro */
+    background: rgba(255, 255, 255, 0.5); /* Mais claro para destacar */
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(5px);
+    
+    /* Design Moderno */
+    color: var(--color-text-dark);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    
+    /* Remove a aparência padrão */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    /* Adiciona uma seta moderna (poderia ser um ícone) */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%231d3557" d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 8px top 50%;
+    padding-right: 30px; /* Espaço para a seta */
+}
+
+.glass-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(69, 123, 157, 0.5); /* Foco suave */
+}
+
+/* 4. Estilo do Botão (Reutilizando o estilo do HomePage) */
+/* Se você usasse CSS Modules, faria um "composes" aqui */
+.filter-button {
+    /* Cor e estilo de Glassmorphism ajustados */
+    background-color: var(--color-accent); 
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: background-color 0.2s, transform 0.1s;
+    cursor: pointer;
+}
+
+.filter-button:hover {
+    background-color: #d11e2f; /* Um pouco mais escuro no hover */
+    transform: scale(1.03);
+}
+
+/* Responsividade para telas menores (ex: mobile) */
+@media (max-width: 950px) { /* Aumentei o breakpoint para garantir que em telas menores o layout de coluna entre */
+    .filter-bar {
+        flex-wrap: wrap; /* Permite a quebra em telas menores */
+        justify-content: flex-start;
+        min-width: unset;
+    }
+    
+    .filter-group {
+        width: 48%; /* Tenta 2 por linha */
+        margin-right: 2%;
+        margin-bottom: 10px;
+    }
+
+    /* Regra para telas MUITO pequenas (se os 48% não funcionarem) */
+    @media (max-width: 500px) {
+        .filter-group {
+             width: 100%; /* 1 por linha */
+             margin-right: 0;
+        }
+    }
+    
+    .filter-button {
+        width: 100%; 
+        margin-top: 10px; 
+    }
+
+    
+}

@@ -1,0 +1,128 @@
+/* Paleta de Cores (Exemplo Pastel/Vibrante) */
+:root {
+  --color-primary-start: #a8dadc; /* Azul Claro Suave */
+  --color-primary-end: #457b9d; /* Azul Médio */
+  --color-accent: #e63946; /* Vermelho Vibrante */
+  --color-glass-bg: rgba(255, 255, 255, 0.2); /* Fundo Semitransparente para o Vidro */
+  --color-text-dark: #1d3557;
+  --color-text-light: #f1faee;
+}
+
+/* 1. Efeito de Fundo Global: Degradê Vibrante e Suave */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte Sans-serif Limpa */
+  /* O Degradê Obrigatório */
+  background: linear-gradient(135deg, var(--color-primary-start) 0%, #ffcbf2 50%, #f1faee 100%); 
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.homepage-container {
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+  text-align: center;
+}
+
+/* 2. O Estilo Glassmorphism (Reutilizável) */
+
+.glass-element {
+  /* Borda Arredondada */
+  border-radius: 15px;
+  /* Cor de Fundo Semitransparente (a chave do Glassmorphism) */
+  background: var(--color-glass-bg);
+  /* Efeito de Vidro Fumê (a outra chave) */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* Suporte para Webkit */
+  /* Borda sutil para definir o objeto */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* Sombra Suave */
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  padding: 20px;
+  color: var(--color-text-dark);
+}
+
+/* Aplicação do Glassmorphism na Header e Footer */
+.header-glass {
+  composes: glass-element; /* Se estivéssemos usando CSS Modules */
+  margin-bottom: 40px;
+}
+
+.footer-glass {
+  composes: glass-element; /* Se estivéssemos usando CSS Modules */
+  margin-top: 40px;
+  padding: 10px;
+  font-size: 0.8rem;
+}
+
+/* 3. Estilos da Grade e dos Cards */
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.game-card {
+  composes: glass-element;
+  text-align: left;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5); /* Sombra mais intensa no hover */
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.category-tag {
+  background-color: var(--color-accent);
+  color: var(--color-text-light);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* Categorias para dar mais cor (opcional, mas moderno) */
+.tag-história { background-color: #ff9f1c; }
+.tag-ciências { background-color: #2ec4b6; }
+.tag-matemática { background-color: #5d5fef; }
+.tag-linguagens { background-color: #e63946; } /* Adicione se não tiver */
+
+/* 4. Estilo Jovem/Moderno no Botão (Glassmorphism Interativo) */
+
+.glass-button {
+  composes: glass-element; /* Reaproveita o estilo base de vidro */
+  background-color: rgba(230, 57, 70, 0.7); /* Fundo semi-transparente do botão */
+  color: var(--color-text-light);
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+  border-radius: 10px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.glass-button:hover {
+  background-color: var(--color-accent); /* Cor sólida no hover */
+  transform: scale(1.02);
+}
+
+.tag-ferramenta { 
+    background-color: #6a0572; /* Roxo Escuro / Destaque */
+    color: var(--color-text-light);
+}

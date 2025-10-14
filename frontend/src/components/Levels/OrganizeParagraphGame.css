@@ -1,0 +1,133 @@
+/* OrganizeParagraphGame.css */
+
+/* 1. Reutilizando a Paleta e o Fundo Global (Deve ser definido no CSS global ou HomePage.css) */
+:root {
+  --color-primary-start: #a8dadc; 
+  --color-accent-green: #4CAF50; /* Verde para Iniciar/Correto */
+  --color-accent-blue: #2196f3; /* Azul para Verificar */
+  --color-accent-orange: #ff9800; /* Laranja para Reiniciar */
+  --color-text-dark: #1d3557;
+  --color-text-light: #f1faee;
+  --color-glass-bg: rgba(255, 255, 255, 0.2); 
+}
+
+/* 2. Estilo Glassmorphism para o Contêiner Principal e Elementos */
+.game-card-glass {
+  /* MUDANÇA: Reduza o max-width para torná-lo mais estreito */
+  max-width: 800px; /* Alterado de 800px para 650px */
+
+  margin: 40px auto;
+  padding: 30px;
+  /* Glassmorphism */
+  border-radius: 15px;
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  color: var(--color-text-dark);
+}
+
+.game-title {
+  color: var(--color-text-dark);
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.8rem; 
+}
+
+/* 3. Estilos dos Inputs e Textareas (Glassy/Clean) */
+.glass-input, .glass-textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  /* ... (outras bordas e fundos) ... */
+  font-size: 16px;
+  
+  /* MUDANÇA 1: Garante que padding e border não estouram o width de 100% */
+  box-sizing: border-box; 
+
+  /* MUDANÇA 2: Aumenta a altura mínima para ser utilizável */
+  min-height: 150px; /* Aumentando a altura para ter um bom espaço de colagem */
+  
+  background-color: rgba(255, 255, 255, 0.4); 
+  color: var(--color-text-dark);
+  transition: border-color 0.3s;
+}
+
+.glass-input, .glass-textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  /* ... (outras bordas e fundos) ... */
+  font-size: 16px;
+  
+  /* Garantia de largura correta */
+  box-sizing: border-box; 
+
+  /* MUDANÇA: Aumentando significativamente a altura mínima */
+  min-height: 250px; /* Aumentado de 150px para 250px */
+  min-width: 600px;
+  
+  background-color: rgba(255, 255, 255, 0.4); 
+  color: var(--color-text-dark);
+  transition: border-color 0.3s;
+}
+
+/* 4. Estilos da Área de Frases (Contêiner Drop) */
+.frases-container-glass {
+  min-height: 180px;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  border: 2px dashed rgba(255, 255, 255, 0.6); /* Borda estilizada */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 5. Estilo de Cada Frase (Draggable Item) */
+.frase-item {
+  background-color: rgba(168, 218, 220, 0.7); /* Cor pastel */
+  border: 1px solid var(--color-primary-start);
+  padding: 12px;
+  cursor: grab;
+  border-radius: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.frase-item:active {
+    cursor: grabbing;
+}
+
+.frase-item.dragging {
+  opacity: 0.4;
+}
+
+.frase-item.drop-target-hover {
+  border-top: 3px solid var(--color-accent-orange) !important;
+  background-color: rgba(168, 218, 220, 0.9);
+}
+
+/* 6. Feedback e Botões (Utilizando o glass-button que já criamos) */
+.feedback-box {
+  margin-top: 20px;
+  font-weight: bold;
+  text-align: center;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.correto {
+  color: var(--color-text-dark);
+  background-color: #e8f5e9;
+  border: 1px solid var(--color-accent-green);
+}
+
+.incorreto {
+  color: var(--color-text-dark);
+  background-color: #ffebee;
+  border: 1px solid #f44336;
+}
