@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
 import './PhraseSequenceCreator.css'; 
-// Importando ícones para o Criador e para o Player
 import { 
     IoAddCircle, 
     IoTrash, 
@@ -12,11 +11,12 @@ import {
 const MAX_PHRASES = 10; 
 
 // --- FUNÇÕES UTILITÁRIAS ES6+ ---
+const splitWordsWithPunctuation = (sentence) => {
+    return sentence.match(/\S+\s*/g) || [];
+};
 
-// Algoritmo de Fisher-Yates para embaralhar palavras
 const shuffleWords = (sentence) => {
-    // Separa por espaços, mantendo a pontuação na palavra
-    const words = sentence.split(/\s+/).filter(w => w.length > 0);
+    const words = splitWordsWithPunctuation(sentence);
     const newWords = [...words];
     let currentIndex = newWords.length, randomIndex;
     
@@ -54,7 +54,7 @@ const PhraseInput = ({ index, text, totalPhrases, onUpdate, onDelete }) => {
 
             {canDelete && isHovered && (
                 <button 
-                    className="delete-button" 
+                    className="delete-button glass-button"
                     onClick={() => onDelete(index)}
                     title="Deletar esta frase"
                 >
@@ -69,68 +69,201 @@ const PhraseInput = ({ index, text, totalPhrases, onUpdate, onDelete }) => {
 // --- SUB-COMPONENTE: Lógica do Jogo (Player) ---
 
 const GamePlayer = ({ phrasesToPlay, onBackToCreator }) => {
-    // ESTADO DO JOGO
+    // 1. ESTADOS E REFERÊNCIAS
     const [currentStep, setCurrentStep] = useState(0); 
     const [wordOrder, setWordOrder] = useState(() => shuffleWords(phrasesToPlay[0]));
     const [score, setScore] = useState(0);
     const [feedback, setFeedback] = useState({ message: '', type: '' });
+    
     const dragItem = useRef(null);
-
-    // Palavras Corretas para a frase atual
+    const touchTarget = useRef(null); 
+    const touchOffset = useRef({ x: 0, y: 0 }); 
+    const initialTransform = useRef({ x: 0, y: 0 }); // Guarda a posição inicial dentro do container
+    
     const correctSentence = phrasesToPlay[currentStep] || '';
-    const correctWords = correctSentence.split(/\s+/).filter(w => w.length > 0);
-
-    // Lógica Drag and Drop
-    const handleWordDrop = useCallback((e, targetIndex) => {
-        e.preventDefault();
-        e.currentTarget.classList.remove('word-drop-hover');
-
-        const draggedIndex = dragItem.current;
-        if (draggedIndex !== null && draggedIndex !== targetIndex) {
-            const newWords = [...wordOrder];
-            const [movedWord] = newWords.splice(draggedIndex, 1);
-            newWords.splice(targetIndex, 0, movedWord);
-            setWordOrder(newWords);
+    const correctWords = splitWordsWithPunctuation(correctSentence).map(w => w.trim());
+    
+    React.useEffect(() => {
+        if (currentStep < phrasesToPlay.length) {
+            setWordOrder(shuffleWords(phrasesToPlay[currentStep]));
             setFeedback({ message: '', type: '' });
         }
+    }, [currentStep, phrasesToPlay]);
+
+    // --- 2. FUNÇÕES AUXILIARES DE TOQUE E DROP (TOUCH/DRAG) ---
+    
+    const findTargetIndex = useCallback((x, y) => {
+        const wordsContainer = document.querySelector('.words-sequence');
+        if (!wordsContainer) return -1;
+
+        const children = Array.from(wordsContainer.children);
+        let closestIndex = -1;
+        let minDistance = Infinity;
+
+        children.forEach((child, index) => {
+            if (touchTarget.current === child && touchTarget.current.classList.contains('dragging')) return;
+
+            const rect = child.getBoundingClientRect();
+            
+            if (y > rect.top && y < rect.bottom) {
+                const center = rect.left + rect.width / 2;
+                const distance = Math.abs(x - center);
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestIndex = index;
+                }
+            }
+        });
+        
+        if (closestIndex === -1 && children.length > 0) {
+            const lastRect = children[children.length - 1].getBoundingClientRect();
+            if (x > lastRect.right) {
+                return children.length; 
+            }
+        }
+        
+        return closestIndex;
+    }, []);
+    
+    const reorganizeWords = useCallback((draggedIndex, targetIndex) => {
+        if (draggedIndex === null || draggedIndex === -1 || targetIndex === -1) return;
+        
+        const newWords = [...wordOrder];
+        const [movedWord] = newWords.splice(draggedIndex, 1);
+        
+        const insertIndex = draggedIndex < targetIndex ? targetIndex -1 : targetIndex;
+
+        newWords.splice(insertIndex, 0, movedWord);
+        
+        setWordOrder(newWords);
+        setFeedback({ message: '', type: '' });
     }, [wordOrder]);
 
-    const handleDragOver = (e, index) => {
-        e.preventDefault();
-        e.currentTarget.classList.add('word-drop-hover');
-    };
-    
-    // Checagem de Ordem e Pontuação
-    const checkOrder = () => {
-        // Junta as palavras com espaço e compara (case-insensitive e sem pontuação para ser mais tolerante)
-        const currentSentenceClean = wordOrder.join(' ').toLowerCase().replace(/[.,!?;]/g, '');
-        const correctSentenceClean = correctWords.join(' ').toLowerCase().replace(/[.,!?;]/g, '');
 
-        const isCorrect = currentSentenceClean === correctSentenceClean;
+    // --- EVENTOS DE TOQUE (CORREÇÃO FINAL) ---
+
+    const handleTouchStart = (e, index) => {
+        e.preventDefault(); 
         
+        const touch = e.touches[0];
+        const rect = e.currentTarget.getBoundingClientRect();
+
+        // 1. Calcular o OFFSET (distância do toque para o canto do elemento)
+        touchOffset.current = {
+            x: touch.clientX - rect.left,
+            y: touch.clientY - rect.top,
+        };
+        
+        // 2. Calcular a posição inicial do elemento em relação ao container pai
+        const parentRect = e.currentTarget.parentElement.getBoundingClientRect();
+        
+        initialTransform.current = {
+            x: rect.left - parentRect.left, 
+            y: rect.top - parentRect.top,   
+        };
+
+        dragItem.current = index;
+        touchTarget.current = e.currentTarget;
+        
+        e.currentTarget.classList.add('dragging');
+        
+        // MUDANÇA: Usar position: absolute
+        e.currentTarget.style.position = 'absolute'; 
+        e.currentTarget.style.zIndex = '1000';
+
+        // 3. Aplica o transform inicial
+        e.currentTarget.style.transform = `translate(${initialTransform.current.x}px, ${initialTransform.current.y}px)`;
+    };
+
+    const handleTouchMove = (e) => { 
+        if (!touchTarget.current) return;
+        
+        e.preventDefault(); 
+
+        const touch = e.touches[0];
+        const offset = touchOffset.current;
+        
+        // Posição do container pai
+        const parentRect = touchTarget.current.parentElement.getBoundingClientRect();
+        
+        // Posição do dedo em relação ao *canto superior esquerdo do container pai*
+        const touchXRelativeToParent = touch.clientX - parentRect.left;
+        const touchYRelativeToParent = touch.clientY - parentRect.top;
+
+        // CÁLCULO FINAL:
+        const x = touchXRelativeToParent - offset.x; 
+        const y = touchYRelativeToParent - offset.y; 
+        
+        touchTarget.current.style.transform = `translate(${x}px, ${y}px)`;
+        
+        // Feedback visual
+        const targetIndex = findTargetIndex(touch.clientX, touch.clientY); 
+        document.querySelectorAll('.word-item').forEach(el => el.classList.remove('word-drop-hover'));
+        
+        if (targetIndex !== -1 && targetIndex !== dragItem.current) {
+            const targetElement = document.querySelector(`.words-sequence .word-item:nth-child(${targetIndex + 1})`);
+            if (targetElement) {
+                 targetElement.classList.add('word-drop-hover');
+            }
+        } 
+    };
+
+    const handleTouchEnd = (e) => {
+        if (!touchTarget.current) return;
+
+        const touchY = e.changedTouches[0].clientY;
+        const touchX = e.changedTouches[0].clientX;
+        const targetIndex = findTargetIndex(touchX, touchY);
+        
+        // Limpeza (essencial)
+        touchTarget.current.classList.remove('dragging');
+        touchTarget.current.style.position = ''; 
+        touchTarget.current.style.transform = ''; 
+        touchTarget.current.style.zIndex = '';
+        
+        document.querySelectorAll('.word-item').forEach(el => el.classList.remove('word-drop-hover'));
+
+        reorganizeWords(dragItem.current, targetIndex);
+        
+        dragItem.current = null;
+        touchTarget.current = null;
+    };
+
+
+    // --- EVENTOS DE MOUSE E LÓGICA DE JOGO (Mantidos) ---
+    const handleWordDrop = (e, targetIndex) => {
+        e.preventDefault();
+        e.currentTarget.classList.remove('word-drop-hover');
+        reorganizeWords(dragItem.current, targetIndex);
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    const checkOrder = () => {
+        const currentWords = wordOrder.map(w => w.trim());
+        const isCorrect = currentWords.every((word, index) => word === correctWords[index]);
+
         if (isCorrect) {
-            setScore(prev => prev + 1);
-            setFeedback({ message: '✨ Ordem Perfeita! Clique em "Próxima Frase".', type: 'correto' });
+            setFeedback({ message: 'Parabéns! Ordem correta!', type: 'correto' });
+            setScore(prevScore => prevScore + 1);
         } else {
-            setFeedback({ message: 'Tente novamente! A ordem das palavras não está correta.', type: 'incorreto' });
+            setFeedback({ message: 'Ops! A ordem ainda não está correta.', type: 'errado' });
         }
     };
     
-    // Avançar para a próxima frase
     const nextPhrase = () => {
         if (currentStep < phrasesToPlay.length - 1) {
-            const nextStep = currentStep + 1;
-            setCurrentStep(nextStep);
-            setWordOrder(shuffleWords(phrasesToPlay[nextStep]));
-            setFeedback({ message: '', type: '' });
+            setCurrentStep(prevStep => prevStep + 1);
         } else {
-            // Fim do Jogo
-            setFeedback({ message: `🏆 Fim do Jogo! Sua pontuação final é ${score}/${phrasesToPlay.length}`, type: 'final' });
-            setCurrentStep(phrasesToPlay.length); // Mudar para um estado final
+            setFeedback({ message: 'Você completou todas as frases!', type: 'final' });
+            setCurrentStep(phrasesToPlay.length);
         }
     };
     
-    // Renderização final (Fim do Jogo)
+    // --- 3. RENDERIZAÇÃO (JSX) ---
     if (currentStep >= phrasesToPlay.length) {
         return (
             <div className="final-screen">
@@ -141,7 +274,7 @@ const GamePlayer = ({ phrasesToPlay, onBackToCreator }) => {
                         <IoSyncCircle size={20} style={{verticalAlign: 'middle', marginRight: '5px'}} />
                         Reiniciar Tudo
                     </button>
-                    <button className="glass-button" onClick={onBackToCreator}>
+                    <button className="glass-button" onClick={onBackToCreator} style={{marginLeft: '10px'}}>
                         &lt; Voltar para o Editor
                     </button>
                 </div>
@@ -150,7 +283,6 @@ const GamePlayer = ({ phrasesToPlay, onBackToCreator }) => {
     }
     
     return (
-        // Usando as classes de estilo do player que definimos antes
         <>
             <h2 className="player-title">🧩 Monte a Frase Certa</h2>
             
@@ -163,18 +295,30 @@ const GamePlayer = ({ phrasesToPlay, onBackToCreator }) => {
             
             <div 
                 className="words-sequence"
-                onDragOver={(e) => e.preventDefault()}
+                onDragOver={handleDragOver} 
             >
                 {wordOrder.map((word, index) => (
                     <span
                         key={word + index} 
-                        className="word-item"
+                        className="word-item glass-item"
                         draggable="true"
-                        onDragStart={(e) => { dragItem.current = index; e.currentTarget.classList.add('dragging'); }}
-                        onDragEnd={(e) => { dragItem.current = null; e.currentTarget.classList.remove('dragging'); }}
+                        
+                        onDragStart={(e) => { 
+                            dragItem.current = index; 
+                            e.currentTarget.classList.add('dragging'); 
+                            e.dataTransfer.setData('text/plain', ''); 
+                        }}
+                        onDragEnd={(e) => { 
+                            dragItem.current = null; 
+                            e.currentTarget.classList.remove('dragging'); 
+                        }}
                         onDrop={(e) => handleWordDrop(e, index)}
-                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('word-drop-hover'); }}
                         onDragLeave={(e) => e.currentTarget.classList.remove('word-drop-hover')}
+                        
+                        onTouchStart={(e) => handleTouchStart(e, index)}
+                        onTouchMove={handleTouchMove} 
+                        onTouchEnd={handleTouchEnd} 
                     >
                         {word}
                     </span>
@@ -183,7 +327,7 @@ const GamePlayer = ({ phrasesToPlay, onBackToCreator }) => {
 
             <div className="player-buttons">
                 <button className="glass-button check-button" onClick={checkOrder}>
-                    Verificar Ordem
+                    <IoCheckmarkCircle size={20} /> Verificar Ordem
                 </button>
                 <button 
                     className="glass-button next-button" 
@@ -195,7 +339,7 @@ const GamePlayer = ({ phrasesToPlay, onBackToCreator }) => {
             </div>
             
             {feedback.message && (
-                <div className={`feedback-box ${feedback.type}`}>
+                <div className={`feedback-box glass-item ${feedback.type}`}>
                     {feedback.type === 'correto' ? <IoCheckmarkCircle size={20} /> : <IoCloseCircle size={20} />}
                     {feedback.message}
                 </div>
@@ -207,16 +351,13 @@ const GamePlayer = ({ phrasesToPlay, onBackToCreator }) => {
 // --- COMPONENTE PRINCIPAL: CONTROLADOR DE ESTADO ---
 
 const PhraseSequenceCreator = () => {
-    // Começa com uma frase de exemplo para facilitar o teste
     const [phrases, setPhrases] = useState([
         "React é uma biblioteca JavaScript para construir interfaces de usuário.", 
         "Ele usa componentes reutilizáveis para gerenciar o estado.", 
         "O aprendizado com Hooks tornou o desenvolvimento mais eficiente."
     ]); 
-    // Estado para alternar entre as telas
     const [isGameReady, setIsGameReady] = useState(false);
     
-    // Funções de Gerenciamento do Array de Frases
     const handleAddPhrase = useCallback(() => {
         if (phrases.length < MAX_PHRASES) {
             setPhrases(prevPhrases => [...prevPhrases, '']);
@@ -239,85 +380,85 @@ const PhraseSequenceCreator = () => {
         }
     }, [phrases.length]);
 
-    // Ação principal: Validar e Mudar para a tela de Jogo
     const handleGenerateGame = () => {
         const phrasesToPlay = phrases.filter(p => p.trim() !== '');
 
-        if (phrasesToPlay.length < 2) {
-            alert('Por favor, adicione pelo menos 2 frases válidas antes de embaralhar.');
+        if (phrasesToPlay.length < 1) {
+            alert('Por favor, adicione pelo menos uma frase válida antes de embaralhar.');
             return;
         }
 
-        // Salva o payload limpo no estado e muda a tela
         setPhrases(phrasesToPlay);
         setIsGameReady(true);
     };
 
-    // Ação de Voltar para o Criador
     const handleBackToCreator = () => {
         setIsGameReady(false);
     };
 
     return (
-        <div className="editor-card-glass">
-            
-            {!isGameReady ? (
-                // --- VISÃO DO CRIADOR (Professor) ---
-                <>
-                    <h1 className="editor-title">🛠️ Criador de Sequência de Frases</h1>
-                    <p className="editor-subtitle">Defina a ordem correta que será usada no jogo.</p>
+        <div className="main-container"> 
+            <div className="editor-card-glass">
+                
+                {!isGameReady ? (
+                    <>
+                        <h1 className="editor-title">🛠️ Criador de Sequência de Frases</h1>
+                        <p className="editor-subtitle">Defina a ordem correta que será usada no jogo.</p>
 
-                    <div className="phrases-list">
-                        {phrases.map((phraseText, index) => (
-                            <PhraseInput
-                                key={index} 
-                                index={index}
-                                text={phraseText}
-                                totalPhrases={phrases.length}
-                                onUpdate={handleUpdatePhrase}
-                                onDelete={handleDeletePhrase}
-                            />
-                        ))}
-                    </div>
+                        <div className="phrases-list">
+                            {phrases.map((phraseText, index) => (
+                                <PhraseInput
+                                    key={index} 
+                                    index={index}
+                                    text={phraseText}
+                                    totalPhrases={phrases.length}
+                                    onUpdate={handleUpdatePhrase}
+                                    onDelete={handleDeletePhrase}
+                                />
+                            ))}
+                        </div>
 
-                    <div className="add-phrase-area">
-                        <p>Adicionar Frase ({phrases.length}/{MAX_PHRASES})</p>
-                        <button 
-                            className={`add-button ${phrases.length >= MAX_PHRASES ? 'disabled' : ''}`}
-                            onClick={handleAddPhrase}
-                            disabled={phrases.length >= MAX_PHRASES}
-                        >
-                            <IoAddCircle size={24} />
-                        </button>
-                    </div>
-                    
-                    <div className="embaralhar-area">
-                        <button className="embaralhar-button glass-button" onClick={handleGenerateGame}>
-                            &gt; Embaralhar e Gerar Game
-                        </button>
-                    </div>
-                </>
-            ) : (
-                // --- VISÃO DO JOGO (Aluno) ---
-                <>
-                    <GamePlayer 
-                        phrasesToPlay={phrases} 
-                        onBackToCreator={handleBackToCreator}
-                    />
-                    
-                    {/* Botão de Voltar para Edição (só aparece no modo Player) */}
-                    <div style={{textAlign: 'center', marginTop: '20px'}}>
-                        <button 
-                            className="glass-button" 
-                            style={{backgroundColor: '#ccc', color: 'var(--color-text-dark)', border: 'none'}}
-                            onClick={handleBackToCreator}
-                        >
-                            &lt; Voltar para Editar Sequência
-                        </button>
-                    </div>
-                </>
-            )}
+                        <div className="add-phrase-area">
+                            <p>Adicionar Frase ({phrases.length}/{MAX_PHRASES})</p>
+                            <button 
+                                className={`add-button glass-button ${phrases.length >= MAX_PHRASES ? 'disabled' : ''}`}
+                                onClick={handleAddPhrase}
+                                disabled={phrases.length >= MAX_PHRASES}
+                            >
+                                <IoAddCircle size={24} />
+                            </button>
+                        </div>
+                        
+                        <div className="embaralhar-area">
+                            <button className="embaralhar-button glass-button" onClick={handleGenerateGame}>
+                                &gt; Embaralhar e Gerar Game
+                            </button>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <GamePlayer 
+                            phrasesToPlay={phrases} 
+                            onBackToCreator={handleBackToCreator}
+                        />
+                        
+                        <div style={{textAlign: 'center', marginTop: '20px'}}>
+                            <button 
+                                className="glass-button" 
+                                style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.2)', 
+                                    color: 'var(--color-text-dark)', 
+                                    border: '1px solid rgba(255, 255, 255, 0.4)'
+                                }}
+                                onClick={handleBackToCreator}
+                            >
+                                &lt; Voltar para Editar Sequência
+                            </button>
+                        </div>
+                    </>
+                )}
 
+            </div>
         </div>
     );
 };

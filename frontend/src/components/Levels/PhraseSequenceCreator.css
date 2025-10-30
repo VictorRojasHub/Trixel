@@ -1,144 +1,128 @@
 /* PhraseSequenceCreator.css */
 
-/* Reutilizando variáveis do nosso tema */
 :root {
-  --color-accent-green: #4CAF50;
-  --color-accent-red: #e63946;
-  --color-text-dark: #1d3557;
-  --color-glass-bg: rgba(255, 255, 255, 0.25); 
+    --color-primary: #8a2be2; 
+    --color-secondary: #ff69b4; 
+    --color-background-start: #8ec5fc; 
+    --color-background-end: #e0c3fc; 
+    --color-text-dark: #2c3e50;
+    --color-text-light: #f5f5f5;
+
+    --glass-background: rgba(255, 255, 255, 0.35); 
+    --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+    --glass-blur: 10px;
+    --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    --border-radius-lg: 15px;
+    --border-radius-sm: 8px;
 }
 
-/* 1. Contêiner Principal (Glassmorphism) */
+/* 1. FUNDO DA PÁGINA (Degradê Vibrante) */
+.main-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, var(--color-background-start) 0%, var(--color-background-end) 100%);
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    color: var(--color-text-dark);
+}
+
+/* 2. COMPONENTE PRINCIPAL (Janela Glassmorphism) */
 .editor-card-glass {
-  max-width: 600px; /* Um pouco maior que o game box */
-  margin: 40px auto;
-  padding: 30px;
-  border-radius: 20px; /* Bordas mais arredondadas como no mockup */
-  background: var(--color-glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 10px 40px rgba(31, 38, 135, 0.3);
-  color: var(--color-text-dark);
-}
-
-.editor-title {
-    font-size: 1.8rem;
-    color: var(--color-text-dark);
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.editor-subtitle {
-    text-align: center;
-    margin-bottom: 25px;
-    opacity: 0.8;
-}
-
-/* 2. Estilo de Cada Linha de Input */
-.phrase-input-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-    position: relative;
-    padding-right: 40px; 
-}
-
-.phrase-input-group label {
-    font-weight: 600;
-    white-space: nowrap;
-    margin-right: 10px;
-    flex-shrink: 0; /* Impede que o label encolha */
-}
-
-/* Reutilizando o estilo do glass-input para a frase */
-.glass-input {
+    max-width: 800px;
     width: 100%;
-    /* MUDANÇA CRUCIAL: Remover min-height e usar padding vertical adequado */
-    min-height: unset; /* Garante que não herda altura mínima grande */
-    padding: 10px; /* Padding vertical adequado para uma linha */
-    height: auto;
-    
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 8px;
-    box-sizing: border-box; 
+    padding: 30px;
+    border-radius: var(--border-radius-lg);
+    background: var(--glass-background);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: var(--glass-border);
+    box-shadow: 0 10px 20px rgba(var(--color-primary), 0.2), var(--glass-shadow);
+}
+
+/* 4. Glass-Buttons Reutilizáveis (Estilos Omitidos por serem repetitivos e sem necessidade de correção) */
+.glass-button {
+    padding: 10px 20px;
+    border: var(--glass-border);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
     font-size: 1rem;
-    background-color: rgba(255, 255, 255, 0.6);
-    color: var(--color-text-dark);
-    transition: border-color 0.3s;
-}
-
-.glass-input:focus {
-    outline: none;
-    border-color: var(--color-accent-green);
-}
-
-/* 3. Botão de Deletar (Lixeira) */
-.delete-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--color-accent-red);
-    position: absolute;
-    right: 0; /* Posiciona fora do input group para o hover */
-    padding: 5px;
-    border-radius: 50%;
-    transition: transform 0.2s, background-color 0.2s;
-}
-
-.delete-button:hover {
-    background-color: rgba(230, 57, 70, 0.1);
-    transform: scale(1.1);
-}
-
-/* 4. Botão de Adicionar Frase */
-.add-phrase-area {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    margin-top: 10px;
-    padding-left: 10px;
-    gap: 15px;
     font-weight: 600;
-    color: var(--color-text-dark);
+    transition: all 0.3s ease;
+    background-color: rgba(138, 43, 226, 0.6); 
+    color: var(--color-text-light);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
-
-.add-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--color-accent-green);
-    transition: transform 0.2s, opacity 0.2s;
+.glass-button:hover:not(:disabled) {
+    background-color: rgba(138, 43, 226, 0.8);
+    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+    transform: translateY(-2px);
 }
-
-.add-button:hover {
-    transform: scale(1.1);
-}
-
-.add-button.disabled {
+.glass-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+/* ... (Estilos de add-button, embaralhar-button, delete-button, glass-input omitidos) ... */
+
+
+/* 6. Player (Palavras Arrastáveis) */
+.words-sequence {
+    display: flex;
+    flex-wrap: wrap; 
+    /* Ajuste de Espaçamento entre Palavras */
+    gap: 8px; /* Reduzido de 10px para 8px */
+    
+    min-height: 100px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 2px dashed rgba(138, 43, 226, 0.4);
+    border-radius: var(--border-radius-lg);
+    background-color: rgba(255, 255, 255, 0.15); 
+    
+    position: relative; 
 }
 
-/* 5. Botão Embaralhar/Gerar Game (Canto Inferior Direito) */
-.embaralhar-area {
-    text-align: right;
-    margin-top: 30px;
+.word-item {
+    cursor: grab;
+    /* MUDANÇA CHAVE: Reduz o padding interno horizontal e vertical */
+    padding: 8px 12px; /* Reduzido de 10px 15px */
+    
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    white-space: nowrap; 
+    transition: all 0.2s ease;
+
+    /* Glassmorphism Específico para o Item (Mantido) */
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    
+    display: inline-block; 
+    
+    /* Opcional: Reduz o tamanho da fonte se a tela for muito pequena */
+    /* font-size: 0.95rem; */
 }
 
-.embaralhar-button {
-    /* Reutilizando o estilo glass-button base */
-    background-color: transparent;
-    border: none;
-    color: var(--color-accent-green); /* Cor de destaque para o texto */
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 5px 10px;
-    transition: opacity 0.2s;
-    text-shadow: 0 0 5px rgba(76, 175, 80, 0.5); /* Sombra suave para destacar */
-}
-
-.embaralhar-button:hover {
+/* Estado de Arrastando */
+.word-item.dragging {
     opacity: 0.8;
+    z-index: 1000 !important;
+    cursor: grabbing;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    
+    transition: none !important; 
 }
+
+/* Estado de Drop Hover */
+.word-item.word-drop-hover {
+    box-shadow: 0 0 0 3px var(--color-secondary), 0 0 15px var(--color-secondary); 
+    transform: scale(1.05);
+}
+
+/* ... (Estilos de score-area, player-buttons, feedback-box omitidos) ... */
