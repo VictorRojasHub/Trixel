@@ -34,12 +34,13 @@
     width: 100%;
     padding: 30px;
     border-radius: var(--border-radius-lg);
+    
+    /* CHAVE 1: Garante que o contêiner principal se ajuste ao seu conteúdo */
+    height: fit-content; 
+    min-height: 200px; /* Mantemos um mínimo razoável */
+    
     background: var(--glass-background);
-    box-shadow: var(--glass-shadow);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: var(--glass-border);
-    box-shadow: 0 10px 20px rgba(var(--color-primary), 0.2), var(--glass-shadow);
+    /* ... (outras propriedades mantidas) ... */
 }
 
 /* 4. Glass-Buttons Reutilizáveis (Estilos Omitidos por serem repetitivos e sem necessidade de correção) */
@@ -75,9 +76,14 @@
 .words-sequence {
     display: flex;
     flex-wrap: wrap; 
-    /* Ajuste de Espaçamento entre Palavras */
-    gap: 8px; /* Reduzido de 10px para 8px */
+    gap: 8px; 
     
+    /* CHAVE 1: Alinha os itens agrupados ao topo do container flexível */
+    align-content: flex-start; 
+    
+    /* CHAVE 2: Garante que os itens são alinhados na linha (vertical) */
+    align-items: flex-start;
+
     min-height: 100px;
     padding: 15px;
     margin-bottom: 20px;
@@ -86,27 +92,34 @@
     background-color: rgba(255, 255, 255, 0.15); 
     
     position: relative; 
+    /* Adicional: Ocupar a largura mínima necessária para o conteúdo (útil em alguns contextos) */
+    width: fit-content; 
+    max-width: 100%; /* Garante que ele não ultrapasse o pai */
+    margin-left: auto;
+    margin-right: auto; /* Centraliza o container se ele não ocupar 100% */
 }
 
 .word-item {
     cursor: grab;
-    /* MUDANÇA CHAVE: Reduz o padding interno horizontal e vertical */
-    padding: 8px 12px; /* Reduzido de 10px 15px */
+    /* Reduz o padding interno */
+    padding: 8px 12px; 
     
     border-radius: var(--border-radius-sm);
     font-weight: 600;
     white-space: nowrap; 
     transition: all 0.2s ease;
 
+    /* NENHUMA PROPRIEDADE DE LARGURA FIXA OU FLEX-GROW */
+    flex-grow: 0; /* Garante que o item não se expanda para preencher espaço vazio */
+    flex-shrink: 0; /* Garante que o item não encolha demais */
+
     /* Glassmorphism Específico para o Item (Mantido) */
     background: rgba(255, 255, 255, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.8);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     
+    /* Mantido: display: inline-block é herdado do flex, mas explicitamos */
     display: inline-block; 
-    
-    /* Opcional: Reduz o tamanho da fonte se a tela for muito pequena */
-    /* font-size: 0.95rem; */
 }
 
 /* Estado de Arrastando */
@@ -126,3 +139,75 @@
 }
 
 /* ... (Estilos de score-area, player-buttons, feedback-box omitidos) ... */
+
+.glass-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: var(--border-radius-sm);
+    background-color: rgba(255, 255, 255, 0.2); 
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    color: var(--color-text-dark);
+    font-size: 1rem;
+    transition: border 0.2s;
+}
+
+/* NOVO: Estilo para Textarea (Múltiplas linhas) */
+.glass-textarea {
+    
+    /* Box Sizing para controle total */
+    box-sizing: border-box; 
+    
+    /* 1. ANULAÇÃO DE ALTURA AGRESSIVA */
+    height: 1px; /* Começa com 1px para forçar o scrollHeight a ser o valor correto */
+    
+    /* 2. DEFINIÇÃO DA ALTURA MÍNIMA (CHAVE) */
+    /* Calcula 3 linhas * 1.5 (line-height padrão) + padding/borda */
+    /* Usaremos um valor fixo em pixels para maior controle: */
+    min-height: 80px; 
+    
+    /* 3. CONTROLE DE FONT E ALINHAMENTO */
+    line-height: 1.5; /* Altura de linha padrão */
+    vertical-align: top;
+    
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: var(--border-radius-sm);
+    background-color: rgba(255, 255, 255, 0.2); 
+    color: var(--color-text-dark);
+    font-size: 1rem;
+    width: 100%; 
+    
+    /* 4. ANULAÇÃO DE ROLAGEM */
+    overflow: auto; /* Permite rolagem apenas se o conteúdo ultrapassar */
+    
+    resize: vertical; 
+}
+
+.glass-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.3);
+}
+
+/* Correção para o contêiner do input (garantir que o textarea ocupe a linha) */
+.phrase-input-group {
+    position: relative;
+    padding: 0; 
+    margin-bottom: 15px;
+}
+
+.phrase-input-group label {
+    display: block; 
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+.phrase-input-group .delete-button {
+    position: absolute;
+    right: 5px; 
+    top: 5px; /* Ajuste para tentar evitar sobreposição com a label */
+    transform: none; 
+}
+
+

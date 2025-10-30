@@ -30,11 +30,29 @@ const shuffleWords = (sentence) => {
     return newWords;
 };
 
+const useAutoResizeTextarea = (textareaRef, text) => {
+    React.useEffect(() => {
+        const textarea = textareaRef.current;
+        if (textarea) {
+            // 1. Reseta a altura para que a rolagem seja recalculada
+            textarea.style.height = 'auto'; 
+            
+            // 2. Define a nova altura com base no conteúdo (scrollHeight)
+            // O scrollHeight é a altura total do conteúdo
+            textarea.style.height = `${textarea.scrollHeight}px`;
+        }
+    }, [textareaRef, text]); // Recalcula quando o texto muda
+};
+
 // --- SUB-COMPONENTE: Linha de Input do Criador ---
 
 const PhraseInput = ({ index, text, totalPhrases, onUpdate, onDelete }) => {
     const canDelete = index > 0;
     const [isHovered, setIsHovered] = useState(false);
+    const textareaRef = useRef(null); // Referência para o textarea
+    
+    // ATIVAÇÃO DO HOOK: Controla o redimensionamento
+    useAutoResizeTextarea(textareaRef, text);
 
     return (
         <div 
@@ -42,11 +60,13 @@ const PhraseInput = ({ index, text, totalPhrases, onUpdate, onDelete }) => {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
+            {/* Label e Textarea em sequência de blocos */}
             <label htmlFor={`phrase-${index}`}>Frase {index + 1}:</label>
-            <input
+            
+            <textarea
                 id={`phrase-${index}`}
-                type="text"
-                className="glass-input"
+                className="glass-textarea" 
+                rows="3" 
                 value={text}
                 onChange={(e) => onUpdate(index, e.target.value)}
                 placeholder={index === 0 ? "Começo da sequência..." : "Próxima frase..."}
